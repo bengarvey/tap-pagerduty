@@ -70,7 +70,7 @@ function PagerDuty() {
           console.log(JSON.stringify(getRecord(convertIncident(inc))));
         });
 
-        if (more && page < 2) {
+        if (more) {
           requestData(page+1, limit);
         }
 

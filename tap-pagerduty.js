@@ -5,7 +5,7 @@ function PagerDuty() {
   var options = {
     host: 'api.pagerduty.com',
     port: 443,
-    path: '/incidents?date_range=all',
+    path: '/incidents?since=${config.since}',
     method: 'GET',
     headers: {
       "Authorization": `Token token=${config.key}`,
@@ -54,8 +54,8 @@ function PagerDuty() {
     return incident;
   }
 
-  function requestData(page, limit) {
-    options.path = `/incidents?limit=${limit}&offset=${page*limit}&date_range=all`;
+  function requestData(since, limit) {
+    options.path = `/incidents?limit=${limit}&since=${since}&time_zone=UTC&sort_by=created_at`;
     var req = https.request(options, function(res) {
       var response = "";
 
@@ -69,9 +69,9 @@ function PagerDuty() {
         incidents.forEach( function(inc) {
           console.log(JSON.stringify(getRecord(convertIncident(inc))));
         });
-
+	since = incidents[incidents.length-1].last_status_change_at;
         if (more) {
-          requestData(page+1, limit);
+          requestData(since, limit);
         }
 
       });
@@ -88,7 +88,7 @@ function PagerDuty() {
 
   pd.getIncidents = function() {
     console.log(JSON.stringify(schema));
-    requestData(0, 100);
+    requestData(config.since, 100);
   }
 
   return pd;
